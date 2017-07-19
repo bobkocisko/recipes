@@ -4,6 +4,8 @@ import PouchDB from 'pouchdb';
 
 var db = new PouchDB('recipes');
 
+var remoteDb = new PouchDB('https://07798190-8e42-4b50-a835-d8fe860cd8c0-bluemix.cloudant.com/recipes');
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -23,6 +25,25 @@ class App extends Component {
   onRecipeLaunched = (recipeId) => {
     this.setState({ displayingRecipeId: recipeId });
   };
+
+  componentDidMount() {
+    db.sync(remoteDb, { 
+      live: true,
+      retry: true
+    }).on('change', function (change) {
+      // yo, something changed!
+      console.info('change');
+    }).on('paused', function (info) {
+      // replication was paused, usually because of a lost connection
+      console.info('replication paused');
+    }).on('active', function (info) {
+      // replication was resumed
+      console.info('replication resumed');
+    }).on('error', function (err) {
+      // totally unhandled error (shouldn't happen)
+      console.error(err);
+    });
+  }
 
   render() {
     return (
@@ -172,7 +193,7 @@ class RecipeEditor extends Component {
   onDeleteButtonClicked = () => {
     db.remove(this.state.savedDoc._id, this.state.savedDoc._rev, (err, response) => {
       if (err) return console.error(err);
-      
+
       this.setState({ isDeleted: true });
       this.props.onRecipeClosed();
     });
