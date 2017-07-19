@@ -1,0 +1,13 @@
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+
+/* This seems to be necessary for a react app (but not for a regular html page) 
+and I don't know why yet*/
+div#root {
+  width: 100%;
+  height: 100%;
+}
